@@ -1,18 +1,10 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
-import SignIn from './pages/SignIn';
-import SignUp from './pages/SignUp';
-import './App.css';
+import './index.css';
 
 function App() {
   return (
-    <Router>
-      <Routes >
-        <Route path="/" element={<Home />} />
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp />} />
-      </Routes>
-    </Router>
+    <div className="bg-pink-500 text-white p-50">
+      App here
+    </div>
   );
 }
 
