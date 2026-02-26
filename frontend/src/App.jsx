@@ -1,10 +1,14 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './index.css';
+import LandingPage from './pages/LandingPage';
 
 function App() {
   return (
-    <div className="bg-pink-500 text-white p-50">
-      App here
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
