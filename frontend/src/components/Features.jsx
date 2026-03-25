@@ -48,7 +48,7 @@ export default function Features() {
           </span>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Everything you need to plan
-            <br />
+            <br/>
             <span className="text-primary">the perfect trip</span>
           </h2>
           <p className="max-w-xl mx-auto text-muted-foreground text-lg">
