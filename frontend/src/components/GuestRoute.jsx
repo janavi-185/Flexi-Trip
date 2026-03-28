@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAuthStore } from '../store/authStore';
+import { useAuthStore } from '../utils/authStore';
 
 /**
  * Blocks auth pages for signed-in users.

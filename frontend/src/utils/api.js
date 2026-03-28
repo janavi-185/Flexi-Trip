@@ -1,24 +1,43 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+import api from './axios';
 
-export async function apiFetch(path, options = {}) {
-  const { headers = {}, ...rest } = options;
-  const hasBody = rest.body !== undefined;
-
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...rest,
-    headers: {
-      ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
-      ...headers,
-    },
-  });
-
-  const contentType = response.headers.get('content-type') || '';
-  const isJson = contentType.includes('application/json');
-  const payload = isJson ? await response.json() : null;
-
-  if (!response.ok) {
-    throw new Error(payload?.message || `Request failed (${response.status})`);
-  }
-
-  return payload;
+function getApiError(error) {
+  const message = error?.response?.data?.message || error?.message || 'Request failed';
+  return new Error(message);
 }
+
+export async function login(email, password) {
+  try {
+    const response = await api.post('/api/auth/login', { email, password });
+    return response.data;
+  } catch (error) {
+    throw getApiError(error);
+  }
+}
+
+export async function register(name, email, password) {
+  try {
+    const response = await api.post('/api/auth/register', { name, email, password });
+    return response.data;
+  } catch (error) {
+    throw getApiError(error);
+  }
+}
+
+export async function me(token) {
+  try {
+    const response = await api.get('/api/auth/me', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw getApiError(error);
+  }
+}
+
+export const authApi = {
+  login: ({ email, password }) => login(email, password),
+  register: ({ name, email, password }) => register(name, email, password),
+  me,
+};

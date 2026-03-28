@@ -1,10 +1,10 @@
 import Navbar from '../components/Navbar';
-import Hero from '../components/Hero';
-import Features from '../components/Features';
-import HowItWorks from '../components/HowItWorks';
-import Testimonials from '../components/Testimonials';
-import CallToAction from '../components/CallToAction';
-import Footer from '../components/Footer';
+import Hero from '../components/home/Hero';
+import Features from '../components/home/Features';
+import HowItWorks from '../components/home/HowItWorks';
+import Testimonials from '../components/home/Testimonials';
+import CallToAction from '../components/home/CallToAction';
+import Footer from '../components/home/Footer';
 
 export default function LandingPage() {
   return (

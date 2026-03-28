@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useAuthStore } from '../../store/authStore';
+import { useAuthStore } from '../../utils/authStore';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -60,7 +60,7 @@ export default function AuthForm({ type = 'signin' }) {
         await login({ email, password });
       }
 
-      navigate('/account');
+      navigate('/dashboard');
     } catch {
       // Errors are displayed from store state.
     }
@@ -191,7 +191,7 @@ export default function AuthForm({ type = 'signin' }) {
                 onChange={(e) => setPassword(e.target.value)}
                 onFocus={() => setFocusedField('password')}
                 onBlur={() => setFocusedField(null)}
-                placeholder="••••••••"
+                placeholder="admin123"
                 required
                 animate={{
                   borderColor:
@@ -219,7 +219,7 @@ export default function AuthForm({ type = 'signin' }) {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   onFocus={() => setFocusedField('confirmPassword')}
                   onBlur={() => setFocusedField(null)}
-                  placeholder="••••••••"
+                  placeholder="admin123"
                   required
                   animate={{
                     borderColor:

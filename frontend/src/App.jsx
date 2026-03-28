@@ -1,13 +1,14 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './index.css';
-import LandingPage from './pages/LandingPage';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import AccountPage from './pages/AccountPage';
+import LandingPage from './pages/Home';
+import LoginPage from './pages/Login';
+import SignupPage from './pages/Signup';
+import AccountPage from './pages/Account';
+import DashboardPage from './pages/Dashboard';
 import GuestRoute from './components/GuestRoute';
 import ProtectedRoute from './components/auth/ProtectedRoute';
-import { useAuthStore } from './store/authStore';
+import { useAuthStore } from './utils/authStore';
 
 function App() {
   const restoreSession = useAuthStore((state) => state.restoreSession);
@@ -19,8 +20,16 @@ function App() {
 
   if (!hasCheckedSession) {
     return (
-      <div className="min-h-screen bg-foreground text-white flex items-center justify-center">
-        Checking your session...
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
+        <div className="relative w-12 h-12">
+          <div className="absolute inset-0 rounded-full border-4 border-border" />
+          <div
+            className="absolute inset-0 rounded-full border-4 border-transparent border-t-primary"
+            style={{ animation: 'spin 0.8s linear infinite' }}
+          />
+        </div>
+        <p className="text-sm text-muted-foreground">Loading…</p>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
@@ -35,6 +44,7 @@ function App() {
         </Route>
         <Route element={<ProtectedRoute />}>
           <Route path="/account" element={<AccountPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

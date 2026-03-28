@@ -9,7 +9,7 @@ const footerLinks = {
 
 export default function Footer() {
   return (
-    <footer className="bg-foreground text-muted-foreground">
+    <footer className="bg-secondary text-muted-foreground border-t border-border">
       <div className="max-w-7xl mx-auto px-6 py-16">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-10">
           {/* Brand */}
@@ -18,9 +18,9 @@ export default function Footer() {
               <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
                 <span className="text-primary-foreground font-bold text-sm">F</span>
               </div>
-              <span className="text-background font-bold text-lg">FlexiTrip</span>
+              <span className="text-foreground font-bold text-lg">FlexiTrip</span>
             </Link>
-            <p className="text-sm leading-relaxed text-white/40">
+            <p className="text-sm leading-relaxed text-muted-foreground">
               AI-powered travel planning for the modern explorer.
             </p>
           </div>
@@ -28,13 +28,13 @@ export default function Footer() {
           {/* Link groups */}
           {Object.entries(footerLinks).map(([group, links]) => (
             <div key={group}>
-              <h4 className="text-background text-sm font-semibold mb-4">{group}</h4>
+              <h4 className="text-foreground text-sm font-semibold mb-4">{group}</h4>
               <ul className="space-y-2">
                 {links.map((link) => (
                   <li key={link}>
                     <a
                       href="#"
-                      className="text-sm text-white/40 hover:text-background transition-colors duration-200"
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
                     >
                       {link}
                     </a>
@@ -45,8 +45,8 @@ export default function Footer() {
           ))}
         </div>
 
-        <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-white/30 text-sm">
+        <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-muted-foreground text-sm">
             © {new Date().getFullYear()} FlexiTrip. All rights reserved.
           </p>
           <div className="flex items-center gap-5">
@@ -54,7 +54,7 @@ export default function Footer() {
               <a
                 key={social}
                 href="#"
-                className="text-white/30 hover:text-background text-sm transition-colors duration-200"
+                className="text-muted-foreground hover:text-foreground text-sm transition-colors duration-200"
               >
                 {social}
               </a>
@@ -65,3 +65,4 @@ export default function Footer() {
     </footer>
   );
 }
+

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuthStore } from '../store/authStore';
+import { useAuthStore } from '../utils/authStore';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -53,12 +53,12 @@ export default function Navbar() {
           {isAuthenticated ? (
             <>
               <Link
-                to="/account"
+                to="/dashboard"
                 className={`text-sm font-medium px-4 py-2 rounded-lg transition-colors duration-300 ${
                   scrolled ? 'text-muted-foreground hover:text-primary' : 'text-white/80 hover:text-white'
                 }`}
               >
-                Account
+                Dashboard
               </Link>
               <button
                 type="button"

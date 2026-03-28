@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { apiFetch } from '../utils/api';
+import { authApi } from './api';
 
 const TOKEN_KEY = 'flexitrip_auth_token';
 
@@ -35,10 +35,7 @@ export const useAuthStore = create((set, get) => ({
   register: async ({ name, email, password }) => {
     set({ isLoading: true, error: null });
     try {
-      const result = await apiFetch('/api/auth/register', {
-        method: 'POST',
-        body: JSON.stringify({ name, email, password }),
-      });
+      const result = await authApi.register({ name, email, password });
 
       const token = result?.data?.token;
       const user = result?.data?.user;
@@ -67,10 +64,7 @@ export const useAuthStore = create((set, get) => ({
   login: async ({ email, password }) => {
     set({ isLoading: true, error: null });
     try {
-      const result = await apiFetch('/api/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ email, password }),
-      });
+      const result = await authApi.login({ email, password });
 
       const token = result?.data?.token;
       const user = result?.data?.user;
@@ -116,12 +110,7 @@ export const useAuthStore = create((set, get) => ({
     set({ isCheckingSession: true, error: null });
 
     try {
-      const result = await apiFetch('/api/auth/me', {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const result = await authApi.me(token);
 
       set({
         token,
