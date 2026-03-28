@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const logout = useAuthStore((state) => state.logout);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -47,20 +50,42 @@ export default function Navbar() {
 
         {/* CTA Buttons */}
         <div className="hidden md:flex items-center gap-3">
-          <Link
-            to="/login"
-            className={`text-sm font-medium px-4 py-2 rounded-lg transition-colors duration-300 ${
-              scrolled ? 'text-muted-foreground hover:text-primary' : 'text-white/80 hover:text-white'
-            }`}
-          >
-            Sign In
-          </Link>
-          <Link
-            to="/signup"
-            className="text-sm font-semibold px-5 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors duration-200"
-          >
-            Get Started
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <Link
+                to="/account"
+                className={`text-sm font-medium px-4 py-2 rounded-lg transition-colors duration-300 ${
+                  scrolled ? 'text-muted-foreground hover:text-primary' : 'text-white/80 hover:text-white'
+                }`}
+              >
+                Account
+              </Link>
+              <button
+                type="button"
+                onClick={logout}
+                className="text-sm font-semibold px-5 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors duration-200 cursor-pointer"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className={`text-sm font-medium px-4 py-2 rounded-lg transition-colors duration-300 ${
+                  scrolled ? 'text-muted-foreground hover:text-primary' : 'text-white/80 hover:text-white'
+                }`}
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/signup"
+                className="text-sm font-semibold px-5 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors duration-200"
+              >
+                Get Started
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Hamburger */}
@@ -88,13 +113,44 @@ export default function Navbar() {
               {item}
             </a>
           ))}
-          <Link
-            to="/signup"
-            className="text-sm font-semibold px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-center hover:bg-primary/90"
-            onClick={() => setMenuOpen(false)}
-          >
-            Get Started Free
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <Link
+                to="/account"
+                className="text-foreground font-medium text-sm hover:text-primary"
+                onClick={() => setMenuOpen(false)}
+              >
+                Account
+              </Link>
+              <button
+                type="button"
+                className="text-sm font-semibold px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-center hover:bg-primary/90 cursor-pointer"
+                onClick={() => {
+                  logout();
+                  setMenuOpen(false);
+                }}
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="text-foreground font-medium text-sm hover:text-primary"
+                onClick={() => setMenuOpen(false)}
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/signup"
+                className="text-sm font-semibold px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-center hover:bg-primary/90"
+                onClick={() => setMenuOpen(false)}
+              >
+                Get Started Free
+              </Link>
+            </>
+          )}
         </div>
       )}
     </nav>

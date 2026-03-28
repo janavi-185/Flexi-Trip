@@ -2,6 +2,7 @@ import "./loadenv.js";
 
 import express from "express";
 import cors from "cors";
+import authRoutes from "./src/routes/auth.js";
 
 const app = express();
 app.use(cors());
@@ -15,7 +16,19 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "OK" });
 });
 
-const PORT = process.env.PORT || 5050;
-app.listen(PORT, () =>
-  console.log(`Server running on http://localhost:${PORT}`)
-);
+app.use("/api/auth", authRoutes);
+
+const PORT = process.env.PORT || 5002;
+
+async function startServer() {
+  try {
+    app.listen(PORT, () => {
+      console.log(`[BOOT] Server running on http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error("[BOOT] Failed to start server:", error.message);
+    process.exit(1);
+  }
+}
+
+startServer();

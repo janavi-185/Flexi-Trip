@@ -7,7 +7,7 @@ export default function Hero() {
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-primary/15 blur-3xl" />
         <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-150 rounded-full bg-primary/5 blur-3xl" />
         {/* Grid overlay */}
         <div
           className="absolute inset-0 opacity-5"
@@ -65,7 +65,7 @@ export default function Hero() {
           worldwide · Free to get started
         </p>
 
-        {/* Mock UI card */}
+        {/* Mock UI card
         <div className="mt-16 max-w-3xl mx-auto rounded-2xl bg-white/5 border border-white/10 p-6 backdrop-blur-sm text-left">
           <div className="flex items-center gap-2 mb-4">
             <div className="w-3 h-3 rounded-full bg-red-400" />
@@ -83,7 +83,7 @@ export default function Hero() {
               <div className="flex-1 h-24 rounded-xl bg-white/5 border border-white/10" />
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </section>
   );
