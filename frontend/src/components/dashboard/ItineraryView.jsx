@@ -94,7 +94,7 @@ export default function ItineraryView({ itinerary }) {
                   {day.day}
                 </div>
                 {idx < days.length - 1 && (
-                  <div className="w-0.5 flex-1 bg-border mt-2 mb-0 min-h-[20px]" />
+                  <div className="w-0.5 flex-1 bg-border mt-2 mb-0 min-h-5" />
                 )}
               </div>
 

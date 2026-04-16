@@ -6,8 +6,7 @@ import LoginPage from './pages/Login';
 import SignupPage from './pages/Signup';
 import AccountPage from './pages/Account';
 import DashboardPage from './pages/Dashboard';
-import GuestRoute from './components/GuestRoute';
-import ProtectedRoute from './components/auth/ProtectedRoute';
+import RouteGuard from './components/auth/Routes';
 import { useAuthStore } from './utils/authStore';
 
 function App() {
@@ -38,11 +37,11 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route element={<GuestRoute />}>
+        <Route element={<RouteGuard type="guest" />}>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
         </Route>
-        <Route element={<ProtectedRoute />}>
+        <Route element={<RouteGuard type="protected" />}>
           <Route path="/account" element={<AccountPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
         </Route>
