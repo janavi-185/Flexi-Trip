@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useTripStore } from '../../utils/tripStore';
 
 const SUGGESTION_CHIPS = [
   '🏖️ Beach vacation on a budget',
@@ -6,14 +7,6 @@ const SUGGESTION_CHIPS = [
   '🏔️ Mountain adventure trip',
   '🌍 International backpacking',
   '🍜 Food & culture tour',
-];
-
-const INITIAL_MESSAGES = [
-  {
-    id: 1,
-    role: 'assistant',
-    text: "Hi there! I'm your AI travel planner ✈️ Tell me about your dream trip — where do you want to go, what's your budget, and when are you planning to travel?",
-  },
 ];
 
 function MessageBubble({ msg }) {
@@ -31,13 +24,13 @@ function MessageBubble({ msg }) {
         </div>
       )}
       <div
-        className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
+        className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
           isUser
             ? 'bg-primary text-primary-foreground rounded-tr-sm'
             : 'bg-secondary text-secondary-foreground rounded-tl-sm border border-border'
         }`}
       >
-        {msg.text}
+        {msg.content || msg.text}
       </div>
     </div>
   );
@@ -67,9 +60,17 @@ function TypingIndicator() {
   );
 }
 
-export default function ChatPanel({ onItineraryGenerated }) {
-  const [messages, setMessages] = useState(INITIAL_MESSAGES);
+export default function ChatPanel() {
+  const activeTrip = useTripStore((s) => s.activeTrip);
+  const chatHistory = useTripStore((s) => s.chatHistory);
+  const isGenerating = useTripStore((s) => s.isGenerating);
+  const createTrip = useTripStore((s) => s.createTrip);
+  const sendMessage = useTripStore((s) => s.sendMessage);
+  const selectTrip = useTripStore((s) => s.selectTrip);
+  const clearActiveTrip = useTripStore((s) => s.clearActiveTrip);
+
   const [input, setInput] = useState('');
+  const [localMessages, setLocalMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const [tripForm, setTripForm] = useState({
     destination: '',
@@ -81,46 +82,102 @@ export default function ChatPanel({ onItineraryGenerated }) {
   const [showForm, setShowForm] = useState(true);
   const bottomRef = useRef(null);
 
+  // Sync local messages with chat history from store
+  useEffect(() => {
+    if (chatHistory.length > 0) {
+      setLocalMessages(chatHistory.map((m) => ({
+        id: m.id,
+        role: m.role,
+        content: m.content,
+      })));
+    }
+  }, [chatHistory]);
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
+  }, [localMessages, isTyping]);
+
+  const handleNewTrip = () => {
+    clearActiveTrip();
+    setLocalMessages([]);
+    setTripForm({ destination: '', budget: '', duration: '', travelers: '1', tripStyle: '' });
+    setShowForm(true);
+  };
 
   const handleSend = async (text = input.trim()) => {
-    if (!text) return;
-
-    const userMsg = { id: Date.now(), role: 'user', text };
-    setMessages((prev) => [...prev, userMsg]);
+    if (!text || isTyping) return;
     setInput('');
+
+    // If no active trip, create one first
+    if (!activeTrip) {
+      if (!tripForm.destination) {
+        // Use the message text to infer destination
+        setTripForm((p) => ({ ...p, destination: text }));
+      }
+
+      const userMsg = { id: Date.now(), role: 'user', content: text };
+      setLocalMessages((prev) => [...prev, userMsg]);
+      setIsTyping(true);
+
+      try {
+        const result = await createTrip({
+          destination: tripForm.destination || text,
+          budget: tripForm.budget,
+          duration: tripForm.duration,
+          travelers: tripForm.travelers,
+          tripStyle: tripForm.tripStyle,
+          message: text,
+        });
+
+        setIsTyping(false);
+
+        const aiMsg = {
+          id: Date.now() + 1,
+          role: 'assistant',
+          content: result.aiMessage || "I've created your itinerary! Check the **My Itinerary** tab to see your plan. 🎉",
+        };
+        setLocalMessages((prev) => [...prev, aiMsg]);
+        setShowForm(false);
+
+        // Load full trip data
+        if (result.trip?.id) {
+          await selectTrip(result.trip.id);
+        }
+      } catch (error) {
+        setIsTyping(false);
+        const errMsg = {
+          id: Date.now() + 1,
+          role: 'assistant',
+          content: `Sorry, something went wrong: ${error.message}. Please try again.`,
+        };
+        setLocalMessages((prev) => [...prev, errMsg]);
+      }
+      return;
+    }
+
+    // Active trip exists — send follow-up message
+    const userMsg = { id: Date.now(), role: 'user', content: text };
+    setLocalMessages((prev) => [...prev, userMsg]);
     setIsTyping(true);
 
-    // Simulate AI response (replace with real API call)
-    await new Promise((r) => setTimeout(r, 1500));
-    setIsTyping(false);
+    try {
+      const result = await sendMessage(text);
+      setIsTyping(false);
 
-    const mockItinerary = {
-      destination: tripForm.destination || 'Your destination',
-      budget: tripForm.budget || 'Not specified',
-      duration: tripForm.duration || '5 days',
-      travelers: tripForm.travelers,
-      tripStyle: tripForm.tripStyle || 'Adventure',
-      days: [
-        { day: 1, title: 'Arrival & Explore', activities: ['Check-in to hotel', 'Evening walk along the waterfront', 'Welcome dinner at a local restaurant'] },
-        { day: 2, title: 'Cultural Immersion', activities: ['Morning museum visit', 'Afternoon heritage walk', 'Traditional cooking class'] },
-        { day: 3, title: 'Nature & Adventure', activities: ['Guided trekking tour', 'Picnic lunch with scenic views', 'Sunset photography spot'] },
-        { day: 4, title: 'Free Exploration', activities: ['Local market shopping', 'Spa & relaxation', 'Street food crawl'] },
-        { day: 5, title: 'Departure Day', activities: ['Breakfast at café', 'Last-minute souvenir shopping', 'Head to airport'] },
-      ],
-    };
-
-    const aiMsg = {
-      id: Date.now() + 1,
-      role: 'assistant',
-      text: `I've created a personalized itinerary for you! 🎉 Check the **My Itinerary** section to see your ${tripForm.duration || '5-day'} trip plan. I've also saved your trip details in the **Trip Details** section.`,
-    };
-    setMessages((prev) => [...prev, aiMsg]);
-
-    if (onItineraryGenerated) {
-      onItineraryGenerated(mockItinerary, { ...tripForm, lastMessage: text });
+      const aiMsg = {
+        id: Date.now() + 1,
+        role: 'assistant',
+        content: result.aiMessage || "Let me know if you'd like any changes!",
+      };
+      setLocalMessages((prev) => [...prev, aiMsg]);
+    } catch (error) {
+      setIsTyping(false);
+      const errMsg = {
+        id: Date.now() + 1,
+        role: 'assistant',
+        content: `Sorry, I had trouble processing that: ${error.message}`,
+      };
+      setLocalMessages((prev) => [...prev, errMsg]);
     }
   };
 
@@ -131,16 +188,42 @@ export default function ChatPanel({ onItineraryGenerated }) {
     }
   };
 
+  const welcomeMessage = {
+    id: 0,
+    role: 'assistant',
+    content: activeTrip
+      ? `Welcome back! You're working on your trip to **${activeTrip.destination}**. Ask me anything or request changes to your itinerary.`
+      : "Hi there! I'm your AI travel planner ✈️ Fill in your trip preferences above, then tell me about your dream trip — and I'll create a personalized itinerary for you!",
+  };
+
+  const displayMessages = localMessages.length > 0
+    ? localMessages
+    : [welcomeMessage];
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-border shrink-0">
-        <h2 className="font-semibold text-lg text-foreground">Plan a Trip</h2>
-        <p className="text-sm text-muted-foreground">Fill in your preferences and chat with your AI planner</p>
+      <div className="px-6 py-4 border-b border-border shrink-0 flex items-center justify-between">
+        <div>
+          <h2 className="font-semibold text-lg text-foreground">
+            {activeTrip ? `Trip to ${activeTrip.destination}` : 'Plan a Trip'}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            {activeTrip ? 'Chat with your AI planner to refine your trip' : 'Fill in your preferences and chat with your AI planner'}
+          </p>
+        </div>
+        {activeTrip && (
+          <button
+            onClick={handleNewTrip}
+            className="px-4 py-2 rounded-xl text-sm font-medium border border-border text-muted-foreground hover:text-foreground hover:border-primary transition-all cursor-pointer"
+          >
+            + New Trip
+          </button>
+        )}
       </div>
 
-      {/* Quick Form */}
-      {showForm && (
+      {/* Quick Form — only show when no active trip */}
+      {!activeTrip && showForm && (
         <div className="px-6 py-4 border-b border-border bg-secondary/30 shrink-0">
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Trip Preferences</p>
@@ -218,15 +301,15 @@ export default function ChatPanel({ onItineraryGenerated }) {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-        {messages.map((msg) => (
+        {displayMessages.map((msg) => (
           <MessageBubble key={msg.id} msg={msg} />
         ))}
-        {isTyping && <TypingIndicator />}
+        {(isTyping || isGenerating) && <TypingIndicator />}
         <div ref={bottomRef} />
       </div>
 
-      {/* Suggestion Chips */}
-      {messages.length <= 1 && (
+      {/* Suggestion Chips — only when no messages yet and no active trip */}
+      {!activeTrip && localMessages.length === 0 && (
         <div className="px-6 pb-2 flex flex-wrap gap-2 shrink-0">
           {SUGGESTION_CHIPS.map((chip) => (
             <button
@@ -252,13 +335,14 @@ export default function ChatPanel({ onItineraryGenerated }) {
               e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Describe your dream trip…"
-            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none leading-relaxed"
+            placeholder={activeTrip ? "Ask to modify your itinerary…" : "Describe your dream trip…"}
+            disabled={isTyping || isGenerating}
+            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none leading-relaxed disabled:opacity-50"
             style={{ minHeight: '24px', maxHeight: '120px' }}
           />
           <button
             onClick={() => handleSend()}
-            disabled={!input.trim()}
+            disabled={!input.trim() || isTyping || isGenerating}
             className="p-2 rounded-xl bg-primary text-primary-foreground disabled:opacity-40 hover:bg-primary/90 transition-all cursor-pointer disabled:cursor-not-allowed shrink-0"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

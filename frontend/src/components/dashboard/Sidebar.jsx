@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../utils/authStore';
+import { useTripStore } from '../../utils/tripStore';
 
 const navItems = [
   {
@@ -44,9 +45,39 @@ export default function Sidebar({ activeView, setActiveView }) {
   const logout = useAuthStore((s) => s.logout);
   const navigate = useNavigate();
 
+  const trips = useTripStore((s) => s.trips);
+  const activeTrip = useTripStore((s) => s.activeTrip);
+  const selectTrip = useTripStore((s) => s.selectTrip);
+  const clearActiveTrip = useTripStore((s) => s.clearActiveTrip);
+  const deleteTrip = useTripStore((s) => s.deleteTrip);
+
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const handleSelectTrip = async (tripId) => {
+    try {
+      await selectTrip(tripId);
+      setActiveView('itinerary');
+    } catch (err) {
+      console.error('Failed to load trip:', err);
+    }
+  };
+
+  const handleNewTrip = () => {
+    clearActiveTrip();
+    setActiveView('chat');
+  };
+
+  const handleDeleteTrip = async (e, tripId) => {
+    e.stopPropagation();
+    if (!confirm('Delete this trip?')) return;
+    try {
+      await deleteTrip(tripId);
+    } catch (err) {
+      console.error('Failed to delete trip:', err);
+    }
   };
 
   return (
@@ -93,7 +124,7 @@ export default function Sidebar({ activeView, setActiveView }) {
       </div>
 
       {/* Nav Items */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+      <nav className="px-3 py-4 space-y-1">
         {!collapsed && (
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 mb-3">
             Navigation
@@ -121,6 +152,62 @@ export default function Sidebar({ activeView, setActiveView }) {
           );
         })}
       </nav>
+
+      {/* Trip History */}
+      {!collapsed && (
+        <div className="flex-1 overflow-y-auto px-3 pb-3">
+          <div className="flex items-center justify-between px-2 mb-2">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              My Trips
+            </p>
+            <button
+              onClick={handleNewTrip}
+              className="text-xs text-primary hover:text-primary/80 font-medium transition-colors cursor-pointer"
+            >
+              + New
+            </button>
+          </div>
+
+          {trips.length === 0 ? (
+            <p className="text-xs text-muted-foreground px-2 py-3">No trips yet. Start planning!</p>
+          ) : (
+            <div className="space-y-1">
+              {trips.map((trip) => {
+                const isSelected = activeTrip && String(activeTrip.id) === String(trip.id);
+                return (
+                  <button
+                    key={trip.id}
+                    onClick={() => handleSelectTrip(trip.id)}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-sm transition-all cursor-pointer group flex items-center gap-2 ${
+                      isSelected
+                        ? 'bg-accent text-foreground border border-primary/20'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                    }`}
+                  >
+                    <span className="text-base shrink-0">✈️</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate text-xs">{trip.destination}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">
+                        {trip.duration || 'No duration'} · {trip.trip_style || 'Any style'}
+                      </p>
+                    </div>
+                    <button
+                      onClick={(e) => handleDeleteTrip(e, trip.id)}
+                      className="p-1 rounded text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                      title="Delete trip"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      </svg>
+                    </button>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* User Footer */}
       <div className={`border-t border-border p-3 ${collapsed ? 'flex justify-center' : ''}`}>

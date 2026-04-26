@@ -3,6 +3,7 @@ import "./loadenv.js";
 import express from "express";
 import cors from "cors";
 import authRoutes from "./src/routes/auth.js";
+import tripRoutes from "./src/routes/trip.js";
 
 const app = express();
 app.use(cors({
@@ -14,6 +15,7 @@ app.use(cors({
 
 app.use(express.json());
 app.use("/api/auth", authRoutes);
+app.use("/api/trips", tripRoutes);
 
 const PORT = process.env.PORT || 5002;
 
